@@ -1,5 +1,5 @@
 __pycache__/
 *.py[cod]
 .env
-*.db
-.venv/
+links.db
+*.sqlite3

@@ -8,3 +8,13 @@ services:
     envVars:
       - key: TOKEN
         sync: false
+      - key: BASE_URL
+        sync: false
+      - key: WEB_APP_URL
+        sync: false
+      - key: APP_NAME
+        value: LinkShotnerPro
+      - key: ADMIN_TOKEN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
