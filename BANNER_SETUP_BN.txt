@@ -1,0 +1,8 @@
+LinkShotnerPro Banner Setup (v6)
+
+এই project-এ আপনার ব্যানারটি bundled আছে:
+static/linkshotnerpro-banner.jpg
+
+GitHub-এ পুরো project-এর ফাইল আপলোড করুন। static/linkshotnerpro-banner.jpg ফাইলটি বাদ দেবেন না। Render Environment-এ BASE_URL আপনার Render service-এর public HTTPS URL দিন; BOT_BANNER_URL খালি রাখলেও default /banner.png URL ব্যবহার হবে। অন্য ছবি ব্যবহার করতে চাইলে BOT_BANNER_URL-এ public HTTPS direct image URL দিন।
+
+Deploy হওয়ার পর https://YOUR-SERVICE.onrender.com/banner.png খুলে image পরীক্ষা করুন, তারপর Telegram bot-এ /start পাঠান। চ্যাট খুললেই নতুন message নিজে থেকে আসে না।

@@ -1,6 +1,6 @@
 import os, re, secrets, sqlite3, threading
 from urllib.parse import urlparse
-from flask import Flask, request, render_template_string, abort, jsonify, redirect
+from flask import Flask, request, render_template_string, abort, jsonify, redirect, send_from_directory
 
 app = Flask(__name__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
@@ -13,7 +13,7 @@ APP_NAME = os.getenv("APP_NAME", "LinkShotnerPro")
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
 TELEGRAM_TOKEN = os.getenv("TOKEN", "").strip() or os.getenv("BOT_TOKEN", "").strip()
 WEB_APP_URL = (os.getenv("WEB_APP_URL", "").strip() or BASE_URL or os.getenv("RENDER_EXTERNAL_URL", "").strip()).rstrip("/")
-BOT_BANNER_URL = os.getenv("BOT_BANNER_URL", "").strip()
+BOT_BANNER_URL = os.getenv("BOT_BANNER_URL", "").strip() or (f"{BASE_URL}/banner.png" if BASE_URL else "")
 
 HTML = r"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -56,6 +56,12 @@ async function copyShortLinkNow(){
 function choosePlatform(p){document.getElementById('platformName').textContent=p;document.getElementById('platformInput').value=p;document.getElementById('facebook').classList.toggle('active',p==='Facebook');document.getElementById('twitter').classList.toggle('active',p==='Twitter')}
 document.getElementById('analyticsForm').addEventListener('submit',async e=>{e.preventDefault();const value=document.getElementById('code').value.trim();const box=document.getElementById('analyticsResult');box.replaceChildren();const loading=document.createElement('div');loading.className='message';loading.textContent='Loading…';box.append(loading);try{const r=await fetch('/api/analytics?code='+encodeURIComponent(value));const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not find link');const result=document.createElement('div');result.className='result';const heading=document.createElement('strong');heading.textContent='Analytics for '+d.code;result.append(heading);const stats=document.createElement('div');stats.className='stats';for(const [num,label] of [[d.views,'Preview page views'],[d.clicks,'Destination clicks']]){const stat=document.createElement('div');stat.className='stat';const b=document.createElement('b');b.textContent=String(num);const span=document.createElement('span');span.textContent=label;stat.append(b,span);stats.append(stat)}const dest=document.createElement('p');dest.className='hint';dest.textContent='Destination: '+d.target_url;result.append(stats,dest);box.replaceChildren(result)}catch(err){const msg=document.createElement('div');msg.className='message error';msg.textContent=err.message||'Could not load analytics';box.replaceChildren(msg)}});
 </script></body></html>"""
+
+@app.get("/banner.png")
+def banner_image():
+    """Serve the bundled Telegram welcome banner as a public image URL."""
+    return send_from_directory(os.path.join(app.root_path, "static"), "linkshotnerpro-banner.jpg", mimetype="image/jpeg", max_age=86400)
+
 
 def connect():
     if DATABASE_URL:

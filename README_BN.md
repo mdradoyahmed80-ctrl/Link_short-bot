@@ -53,3 +53,16 @@ HTTPS-এ Clipboard API ব্যবহার হবে। সেটি ব্�
 
 ### Short link ক্লিক করলে সরাসরি গন্তব্যে যাবে
 বর্তমান সংস্করণে সাধারণ ভিজিটর `/s/CODE` খুললে কোনো “Continue to your destination” পেজ বা countdown দেখানো হয় না; HTTP 302 দিয়ে সরাসরি destination URL-এ পাঠানো হয়। Social preview crawler-এর জন্য Open Graph metadata আলাদা রাখা হয়েছে, যাতে শেয়ার করার সময় image preview কাজ করতে পারে।
+
+## Telegram /start ব্যানার (v6)
+
+এই সংস্করণে `static/linkshotnerpro-banner.jpg` ফাইলে LinkShotnerPro-এর ব্যানার যুক্ত আছে। Render-এ `BASE_URL` অথবা `RENDER_EXTERNAL_URL` সঠিক public HTTPS URL হলে বট স্বয়ংক্রিয়ভাবে `https://আপনার-সার্ভিস.onrender.com/banner.png` থেকে ছবিটি `/start`-এ পাঠানোর চেষ্টা করবে। তাই `BOT_BANNER_URL` আলাদাভাবে দেওয়া বাধ্যতামূলক নয়। চাইলে Environment-এ `BOT_BANNER_URL` দিয়ে অন্য public HTTPS image URL-ও নির্দিষ্ট করতে পারবেন।
+
+### GitHub ও Render-এ আপলোড
+1. ZIP extract করুন এবং ভেতরের project files-গুলো GitHub repository root-এ upload করুন (পুরো folder-কে আরেকটি folder-এর ভেতরে ভুল করে nest করবেন না)।
+2. নিশ্চিত করুন `static/linkshotnerpro-banner.jpg` ফাইলটিও repository-তে আছে।
+3. Render-এ `TOKEN` এবং `BASE_URL`/`WEB_APP_URL`-এর মতো আগের Environment Variables ঠিক রাখুন। `BASE_URL`-এ আপনার Render service-এর public HTTPS URL দিন।
+4. Deploy করুন। Deploy শেষে browser-এ `https://আপনার-সার্ভিস.onrender.com/banner.png` খুলে image দেখা যাচ্ছে কি না পরীক্ষা করুন।
+5. Telegram-এ `/start` পাঠিয়ে banner photo + welcome caption + Open LinkShotnerPro button পরীক্ষা করুন। Telegram-এ চ্যাট খোলামাত্র নতুন message স্বয়ংক্রিয়ভাবে আসে না; `/start` পাঠাতে হবে।
+
+`BOT_BANNER_URL` সেট করা থাকলে সেটিই অগ্রাধিকার পাবে। Banner পাঠাতে Telegram bot-এর `TOKEN` বৈধ হতে হবে এবং public image URL-টি Telegram-এর server থেকে access করা যেতে হবে।
