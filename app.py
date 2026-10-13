@@ -188,7 +188,9 @@ def start_telegram_bot():
 
         def open_app_markup():
             markup = InlineKeyboardMarkup()
-            markup.add(InlineKeyboardButton("Full Source Code of This Bot", url="https://yt-thumbnail-downloader-bsb6.onrender.com/"))
+            # Each button on its own row (vertically stacked).
+            markup.row(InlineKeyboardButton("Open LinkShotner Pro", web_app=WebAppInfo(url=WEB_APP_URL)))
+            markup.row(InlineKeyboardButton("Full Source Code of This Bot", url="https://yt-thumbnail-downloader-bsb6.onrender.com/"))
             return markup
 
         @telegram_bot.message_handler(commands=["start"])
