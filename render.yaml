@@ -14,6 +14,8 @@ services:
         sync: false
       - key: APP_NAME
         value: LinkShotnerPro
+      - key: BOT_BANNER_URL
+        sync: false
       - key: ADMIN_TOKEN
         sync: false
       - key: DATABASE_URL

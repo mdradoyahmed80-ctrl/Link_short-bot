@@ -44,3 +44,12 @@ HTTPS-এ Clipboard API ব্যবহার হবে। সেটি ব্�
 - Short link তৈরি হলে Copy Short Link বাটন; clipboard API না চললে manual copy fallback।
 - `/health` endpoint দিয়ে deployment/database health পরীক্ষা।
 - স্থায়ী ডেটার জন্য Render PostgreSQL-এর `DATABASE_URL` ব্যবহার করার পরামর্শ দেওয়া হচ্ছে; SQLite ফাইল ephemeral hosting-এ হারিয়ে যেতে পারে।
+
+## ভিডিও রেফারেন্স ও QA রিপোর্ট
+স্ক্রিন-ভিত্তিক তুলনা, পরিবর্তন, পরীক্ষার অবস্থা এবং সীমাবদ্ধতা `COMPARISON_REPORT_BN.md` ফাইলে আছে। মনে রাখবেন: source review সফল হওয়া live runtime test-এর সমান নয়।
+
+## Telegram /start banner
+ঐচ্ছিক `BOT_BANNER_URL` environment variable-এ public HTTPS image URL দিন। বট `/start`-এ ছবির সঙ্গে caption এবং Open Web App button পাঠাবে। URL ফাঁকা বা ছবি পাঠানো ব্যর্থ হলে text message fallback হবে। Telegram profile picture/About text BotFather থেকে সেট করতে হবে।
+
+### Short link ক্লিক করলে সরাসরি গন্তব্যে যাবে
+বর্তমান সংস্করণে সাধারণ ভিজিটর `/s/CODE` খুললে কোনো “Continue to your destination” পেজ বা countdown দেখানো হয় না; HTTP 302 দিয়ে সরাসরি destination URL-এ পাঠানো হয়। Social preview crawler-এর জন্য Open Graph metadata আলাদা রাখা হয়েছে, যাতে শেয়ার করার সময় image preview কাজ করতে পারে।

@@ -1,6 +1,6 @@
 import os, re, secrets, sqlite3, threading
 from urllib.parse import urlparse
-from flask import Flask, request, render_template_string, abort, jsonify
+from flask import Flask, request, render_template_string, abort, jsonify, redirect
 
 app = Flask(__name__)
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
@@ -13,6 +13,7 @@ APP_NAME = os.getenv("APP_NAME", "LinkShotnerPro")
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
 TELEGRAM_TOKEN = os.getenv("TOKEN", "").strip() or os.getenv("BOT_TOKEN", "").strip()
 WEB_APP_URL = (os.getenv("WEB_APP_URL", "").strip() or BASE_URL or os.getenv("RENDER_EXTERNAL_URL", "").strip()).rstrip("/")
+BOT_BANNER_URL = os.getenv("BOT_BANNER_URL", "").strip()
 
 HTML = r"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -20,13 +21,13 @@ HTML = r"""<!doctype html>
 <style>
 :root{color-scheme:dark;--bg:#0e172b;--card:#1d293d;--border:#2c3a52;--text:#f6f7fb;--muted:#9aa9bf;--purple:#5145e5;--blue:#347ff0}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-nav{height:95px;border-bottom:1px solid #202c40;display:flex;align-items:center;justify-content:space-between;padding:0 max(26px,calc((100vw - 1000px)/2));gap:20px}
+nav{height:58px;border-bottom:1px solid #202c40;display:flex;align-items:center;justify-content:space-between;padding:0 max(18px,calc((100vw - 1000px)/2));gap:14px}
 .logo{font-size:clamp(21px,3vw,30px);font-weight:850;letter-spacing:-1px;color:#8185ff}nav .links{display:flex;gap:24px;color:#a8b3c7;font-weight:600}
-main{max-width:760px;margin:auto;padding:48px 26px 42px}.hero{text-align:center;margin-bottom:30px}.hero h1{font-size:clamp(31px,6vw,49px);line-height:1.18;letter-spacing:-1.6px;margin:0 auto 18px;max-width:700px}.accent{color:#8584ff}.hero p{font-size:clamp(17px,3vw,22px);color:var(--muted);max-width:600px;margin:0 auto 32px}
-.platforms{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:34px}.platform{border:1px solid #303c50;border-radius:14px;padding:15px 12px;background:#202c40;color:#a9b5c8;font-size:18px;font-weight:750;cursor:pointer}.platform.active{background:var(--purple);border-color:var(--purple);color:#fff}
-.card{background:var(--card);border:1px solid var(--border);border-radius:27px;padding:32px 34px;margin:0 0 34px;box-shadow:0 18px 40px #0001}.platform-label{color:#9a9bff;font-weight:750;margin-bottom:14px;font-size:18px}label{display:block;color:#a9b7ca;font-weight:600;margin:16px 0 10px}input{display:block;width:100%;min-width:0;background:#0e1729;border:1px solid #35435a;color:#fff;border-radius:14px;padding:18px 20px;font:inherit;font-size:18px;outline:none}input:focus{border-color:#7776ff;box-shadow:0 0 0 3px #7776ff22}button.submit{width:100%;border:0;border-radius:14px;background:var(--purple);color:#fff;padding:18px;font-size:21px;font-weight:800;margin-top:26px;cursor:pointer}button.blue{background:var(--blue)}.card h2{font-size:25px;margin:0 0 22px;letter-spacing:-.5px}.result,.message{margin-top:20px;background:#0e1729;border:1px solid #35435a;border-radius:13px;padding:15px;overflow-wrap:anywhere}.result a{color:#a6a2ff}.hidden{display:none}.hint{color:var(--muted);font-size:14px}.error{color:#ffd9e0}.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.stat{background:#111c30;border:1px solid #33415b;border-radius:12px;padding:14px}.stat b{display:block;font-size:27px}.stat span{color:var(--muted);font-size:13px}
+main{max-width:760px;margin:auto;padding:24px 18px 30px}.hero{text-align:center;margin-bottom:20px}.hero h1{font-size:clamp(28px,5.4vw,43px);line-height:1.18;letter-spacing:-1.2px;margin:0 auto 12px;max-width:700px}.accent{color:#8584ff}.hero p{font-size:clamp(14px,2.6vw,17px);color:var(--muted);max-width:600px;margin:0 auto 22px}
+.platforms{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}.platform{border:1px solid #303c50;border-radius:9px;padding:10px 8px;background:#202c40;color:#a9b5c8;font-size:15px;font-weight:750;cursor:pointer}.platform.active{background:var(--purple);border-color:var(--purple);color:#fff}
+.card{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:16px 16px;margin:0 0 16px;box-shadow:0 8px 20px #0001}.platform-label{color:#9a9bff;font-weight:750;margin-bottom:10px;font-size:14px}label{display:block;color:#a9b7ca;font-weight:600;margin:12px 0 7px;font-size:13px}input{display:block;width:100%;min-width:0;background:#0e1729;border:1px solid #35435a;color:#fff;border-radius:8px;padding:10px 12px;font:inherit;font-size:13px;outline:none}input:focus{border-color:#7776ff;box-shadow:0 0 0 3px #7776ff22}button.submit{width:100%;border:0;border-radius:8px;background:var(--purple);color:#fff;padding:10px 12px;font-size:14px;font-weight:800;margin-top:14px;cursor:pointer}button.blue{background:var(--blue)}.card h2{font-size:16px;margin:0 0 12px;letter-spacing:-.2px}.result,.message{margin-top:20px;background:#0e1729;border:1px solid #35435a;border-radius:13px;padding:15px;overflow-wrap:anywhere}.result a{color:#a6a2ff}.hidden{display:none}.hint{color:var(--muted);font-size:14px}.error{color:#ffd9e0}.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.stat{background:#111c30;border:1px solid #33415b;border-radius:12px;padding:14px}.stat b{display:block;font-size:27px}.stat span{color:var(--muted);font-size:13px}
 .viral-card{border-color:#6b3b55;background:linear-gradient(135deg,#241d36,#1d293d)}.viral-link{display:block;text-align:center;text-decoration:none;box-sizing:border-box}.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.feature{padding:16px;border-radius:13px;border:1px solid #35435a;background:#111c30}.feature b,.feature span{display:block}.feature span{color:var(--muted);font-size:14px;margin-top:7px}@media(max-width:520px){.feature-grid{grid-template-columns:1fr}.viral-link{font-size:18px}}
-@media(max-width:520px){nav{height:95px;padding:0 26px}.links{gap:16px!important;font-size:15px}main{padding:48px 26px 30px}.card{padding:30px 34px;border-radius:27px}.platforms{gap:16px}.platform{font-size:16px;padding:15px 8px}input{font-size:17px;padding:18px 20px}.hero h1{font-size:clamp(30px,7vw,40px)}.card h2{font-size:23px}}
+@media(max-width:520px){nav{height:44px;padding:0 12px}.logo{font-size:17px;letter-spacing:-.5px}.links{gap:12px!important;font-size:11px}main{padding:16px 10px 22px}.card{padding:12px 12px;border-radius:12px}.platforms{gap:8px}.platform{font-size:12px;padding:8px 5px;border-radius:7px}input{font-size:12px;padding:9px 10px;border-radius:7px}.hero h1{font-size:clamp(25px,6.5vw,34px)}.card h2{font-size:14px}.hero p{font-size:12px}.submit{font-size:13px!important}}
 </style></head><body>
 <nav><div class="logo">{{ app_name }}</div><div class="links"><span>Products</span><span>Pricing</span></div></nav>
 <main><section class="hero"><h1>Make Shorten URL for <span class="accent">your brand</span></h1><p>Connect with your audience using custom image preview links.</p>
@@ -53,7 +54,7 @@ async function copyShortLinkNow(){
  catch(e){ field.focus(); field.select(); field.setSelectionRange(0, field.value.length); let ok=false; try { ok=document.execCommand('copy'); } catch(_) {} if(ok){status.textContent='Copied successfully ✓';btn.textContent='Copied ✓';} else {status.textContent='Link selected. Long-press the selected link and choose Copy.';} }
 }
 function choosePlatform(p){document.getElementById('platformName').textContent=p;document.getElementById('platformInput').value=p;document.getElementById('facebook').classList.toggle('active',p==='Facebook');document.getElementById('twitter').classList.toggle('active',p==='Twitter')}
-document.getElementById('analyticsForm').addEventListener('submit',async e=>{e.preventDefault();const value=document.getElementById('code').value.trim();const box=document.getElementById('analyticsResult');box.innerHTML='<div class="message">Loading…</div>';try{const r=await fetch('/api/analytics?code='+encodeURIComponent(value));const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not find link');box.innerHTML=`<div class="result"><strong>Analytics for ${d.code}</strong><div class="stats"><div class="stat"><b>${d.views}</b><span>Preview page views</span></div><div class="stat"><b>${d.clicks}</b><span>Destination clicks</span></div></div><p class="hint">Destination: ${d.target_url}</p></div>`}catch(err){box.innerHTML='<div class="message error">'+err.message+'</div>'}});
+document.getElementById('analyticsForm').addEventListener('submit',async e=>{e.preventDefault();const value=document.getElementById('code').value.trim();const box=document.getElementById('analyticsResult');box.replaceChildren();const loading=document.createElement('div');loading.className='message';loading.textContent='Loading…';box.append(loading);try{const r=await fetch('/api/analytics?code='+encodeURIComponent(value));const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not find link');const result=document.createElement('div');result.className='result';const heading=document.createElement('strong');heading.textContent='Analytics for '+d.code;result.append(heading);const stats=document.createElement('div');stats.className='stats';for(const [num,label] of [[d.views,'Preview page views'],[d.clicks,'Destination clicks']]){const stat=document.createElement('div');stat.className='stat';const b=document.createElement('b');b.textContent=String(num);const span=document.createElement('span');span.textContent=label;stat.append(b,span);stats.append(stat)}const dest=document.createElement('p');dest.className='hint';dest.textContent='Destination: '+d.target_url;result.append(stats,dest);box.replaceChildren(result)}catch(err){const msg=document.createElement('div');msg.className='message error';msg.textContent=err.message||'Could not load analytics';box.replaceChildren(msg)}});
 </script></body></html>"""
 
 def connect():
@@ -121,10 +122,20 @@ def short(code):
         item=execute(c, "SELECT * FROM links WHERE code=?",(code,)).fetchone()
         if not item:
             return render_template_string("""<!doctype html><html lang='en'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Link not found — {{ app_name }}</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0e172b;color:#f6f7fb;font:16px system-ui;padding:24px;box-sizing:border-box}.box{max-width:520px;text-align:center;background:#1d293d;border:1px solid #2c3a52;border-radius:20px;padding:32px}a{color:#aaa7ff}</style><main class='box'><h1>Link not found</h1><p>This short link does not exist in the current database. It may be outdated or its stored record may have been lost.</p><p><a href='/'>Open LinkShotnerPro</a> to create a new link.</p></main></html>""", app_name=APP_NAME),404
-        execute(c, "UPDATE links SET views=views+1 WHERE code=?",(code,))
+
     canonical=f"{base_url()}/s/{code}"
-    return render_template_string("""<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{{ title }}</title><meta property="og:type" content="website"><meta property="og:title" content="{{ title }}"><meta property="og:description" content="Open this link to continue."><meta property="og:image" content="{{ image }}"><meta property="og:url" content="{{ canonical }}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ title }}"><meta name="twitter:image" content="{{ image }}"><link rel="canonical" href="{{ canonical }}"><style>body{background:#0e172b;color:#fff;font:17px system-ui;display:grid;place-items:center;min-height:90vh;text-align:center;padding:20px}a{color:#fff}.btn{display:inline-block;background:#5145e5;border-radius:12px;padding:14px 22px;text-decoration:none;font-weight:700;margin-top:12px}</style></head><body><main><h2>Continue to your destination</h2><p>If you are not redirected automatically, tap the button below.</p><p><a class="btn" id="continueLink" href="{{ target }}">Continue now ↗</a></p><p id="countdown" style="color:#9aa9bf">Opening in 3 seconds…</p></main><script>let sent=false;function track(){if(!sent){sent=true;fetch('/api/click/{{ code }}',{method:'POST',keepalive:true}).catch(()=>{});}}document.getElementById('continueLink').addEventListener('click',track);let seconds=3;const label=document.getElementById('countdown');const timer=setInterval(()=>{seconds--;if(seconds<=0){clearInterval(timer);track();location.href={{ target|tojson }};}else{label.textContent='Opening in '+seconds+' seconds…';}},1000);</script></body></html>""",title=item["title"],image=item["image_url"],canonical=canonical,target=item["target_url"],code=code)
+    target=item["target_url"]
+    # Social preview crawlers need the Open Graph tags to fetch the chosen image.
+    # Real visitors skip the interstitial and are redirected immediately.
+    user_agent=request.headers.get("User-Agent", "")
+    crawler=re.search(r"facebookexternalhit|facebot|twitterbot|telegrambot|whatsapp|slackbot|discordbot|linkedinbot|pinterest|googlebot|bingbot", user_agent, re.I)
+    if crawler:
+        return render_template_string("""<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ title }}</title><meta property="og:type" content="website"><meta property="og:title" content="{{ title }}"><meta property="og:description" content="Open this link to continue."><meta property="og:image" content="{{ image }}"><meta property="og:url" content="{{ canonical }}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ title }}"><meta name="twitter:image" content="{{ image }}"><link rel="canonical" href="{{ canonical }}"></head><body></body></html>""",title=item["title"],image=item["image_url"],canonical=canonical)
+
+    # Count the human visit and destination click, then issue an immediate HTTP redirect.
+    with connect() as c:
+        execute(c, "UPDATE links SET views=views+1, clicks=clicks+1 WHERE code=?",(code,))
+    return redirect(target, code=302)
 
 @app.post("/api/click/<code>")
 def click(code):
@@ -182,7 +193,17 @@ def start_telegram_bot():
 
         @telegram_bot.message_handler(commands=["start"])
         def start_message(message):
-            telegram_bot.reply_to(message, "Welcome to LinkShotnerPro! 🚀\n\nCreate custom image-preview short links and check link analytics.\n\nTap the button below to get started.", reply_markup=open_app_markup())
+            intro = ("What can this bot do?\n\n"
+                     "Welcome to LinkShotnerPro! 🚀\n"
+                     "This bot helps you create custom image preview short links and manage your URL, track campaign performance, and share links efficiently.\n\n"
+                     "Tap the button below to get started.")
+            if BOT_BANNER_URL.startswith("https://"):
+                try:
+                    telegram_bot.send_photo(message.chat.id, BOT_BANNER_URL, caption=intro, reply_markup=open_app_markup())
+                    return
+                except Exception as photo_exc:
+                    print(f"Telegram banner could not be sent: {type(photo_exc).__name__}", flush=True)
+            telegram_bot.reply_to(message, intro, reply_markup=open_app_markup())
 
         @telegram_bot.message_handler(commands=["webapp"])
         def webapp_message(message):
