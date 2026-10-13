@@ -43,6 +43,7 @@ main{max-width:760px;margin:auto;padding:24px 18px 30px}.hero{text-align:center;
 {% if short_url %}<div class="result"><strong>Your short link:</strong><p><input id="shortLinkOutput" type="text" readonly value="{{ short_url }}" aria-label="Short link" onclick="this.select()"></p><button id="copyShortLink" class="submit" type="button" onclick="copyShortLinkNow()">Copy Short Link</button><p id="copyStatus" class="hint" role="status" aria-live="polite">Tap Copy Short Link. If copying is blocked, the link will be selected for manual copy.</p><p class="hint">Social platforms may cache link previews.</p></div>{% endif %}
 </section>
 <section class="card"><h2>📊 Track Link Clicks &amp; Views</h2><form id="analyticsForm"><label for="code">Enter Short Link or Code:</label><input id="code" name="code" required placeholder="e.g. code or full link"><button class="submit blue" type="submit">Check Analytics</button></form><div id="analyticsResult"></div></section>
+<section class="card viral-card"><h2>🔥 Viral Hot Video</h2><p class="hint">Open the featured video link in a new tab. External destination:</p><a class="submit viral-link" href="https://www.profitableratecpmnetwork.com/hbfjhrhhf?key=4033a77c196373f2704f3c92d5dd8c21" target="_blank" rel="noopener noreferrer">▶ Open Viral Hot Video ↗</a></section>
 <section class="card guide-card"><h2>🚀 Advanced Link Shortener &amp; Social Booster Guide</h2><p class="hint">Create a short link, add an image preview, then share it where you have permission.</p><div class="feature-grid"><div class="feature"><b>🖼️ Rich Meta Previews</b><span>Attach a direct image URL for supported social previews.</span></div><div class="feature"><b>📊 Link Analytics</b><span>Check preview views and destination clicks.</span></div><div class="feature"><b>📱 Telegram Web App</b><span>Open the tool from your Telegram bot.</span></div><div class="feature"><b>🔐 Safer Redirects</b><span>Clear continue button and HTTPS-ready deployment.</span></div></div><p class="hint">Tip: social platforms may cache previews. Use an image you own or are authorized to share.</p></section>
 <p class="hint">Use only links and images you own or are authorized to share.</p></main>
 <script>
@@ -187,7 +188,6 @@ def start_telegram_bot():
 
         def open_app_markup():
             markup = InlineKeyboardMarkup()
-            markup.add(InlineKeyboardButton("🔗 Open LinkShotnerPro", web_app=WebAppInfo(url=WEB_APP_URL)))
             markup.add(InlineKeyboardButton("Full Source Code of This Bot", url="https://yt-thumbnail-downloader-bsb6.onrender.com/"))
             return markup
 
@@ -224,9 +224,6 @@ if TELEGRAM_TOKEN:
     threading.Thread(target=start_telegram_bot, name="telegram-bot", daemon=True).start()
 else:
     print("TOKEN is not set; web app will run, but Telegram bot will remain inactive.", flush=True)
-
-from keepalive import start_keepalive
-start_keepalive()
 
 if __name__=="__main__":
     app.run(host="0.0.0.0",port=int(os.getenv("PORT","5000")),debug=False)
