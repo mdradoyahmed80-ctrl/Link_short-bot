@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: linkshotnerpro
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: TOKEN
+        sync: false
