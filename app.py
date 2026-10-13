@@ -225,5 +225,8 @@ if TELEGRAM_TOKEN:
 else:
     print("TOKEN is not set; web app will run, but Telegram bot will remain inactive.", flush=True)
 
+from keepalive import start_keepalive
+start_keepalive()
+
 if __name__=="__main__":
     app.run(host="0.0.0.0",port=int(os.getenv("PORT","5000")),debug=False)
