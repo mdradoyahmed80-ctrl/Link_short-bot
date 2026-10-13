@@ -188,6 +188,7 @@ def start_telegram_bot():
 
         def open_app_markup():
             markup = InlineKeyboardMarkup()
+            markup.add(InlineKeyboardButton("🔗 Open LinkShotnerPro", web_app=WebAppInfo(url=WEB_APP_URL)))
             markup.add(InlineKeyboardButton("Full Source Code of This Bot", url="https://yt-thumbnail-downloader-bsb6.onrender.com/"))
             return markup
 
@@ -224,6 +225,9 @@ if TELEGRAM_TOKEN:
     threading.Thread(target=start_telegram_bot, name="telegram-bot", daemon=True).start()
 else:
     print("TOKEN is not set; web app will run, but Telegram bot will remain inactive.", flush=True)
+
+from keepalive import start_keepalive
+start_keepalive()
 
 if __name__=="__main__":
     app.run(host="0.0.0.0",port=int(os.getenv("PORT","5000")),debug=False)
